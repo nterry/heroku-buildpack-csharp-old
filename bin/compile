@@ -29,30 +29,29 @@ VENDORED_MONO="$(mktmpdir mono)"
 echo "-----> Fetching Mono binaries"
 mkdir -p $VENDORED_MONO  && curl $MONO_PACKAGE -s -o -  | tar xzf - -C $VENDORED_MONO
 
-# vendor node into the slug       
-PATH="$BUILD_DIR/bin:$PATH"
+# vendor node into the slug
+MONO_DIR="/usr/mono"
+PATH="$MONO_DIR/bin:$PATH"
 echo "-----> Vendoring mono $MONO_VERSION"
-mkdir -p "$BUILD_DIR/mono-build"
-mkdir -p "$BUILD_DIR/mono-build/bin/"
-cp -r "$VENDORED_MONO/bin/" "$BUILD_DIR/mono-build/"
-mkdir -p "$BUILD_DIR/mono-build/etc/"
-cp -r "$VENDORED_MONO/etc/" "$BUILD_DIR/mono-build/"
-mkdir -p "$BUILD_DIR/mono-build/include/"
-cp -r "$VENDORED_MONO/include/" "$BUILD_DIR/mono-build/"
-mkdir -p "$BUILD_DIR/mono-build/lib/"
-cp -r "$VENDORED_MONO/lib/" "$BUILD_DIR/mono-build/"
-mkdir -p "$BUILD_DIR/mono-build/share/"
-cp -r "$VENDORED_MONO/share/" "$BUILD_DIR/mono-build/"
+sudo mkdir -p "$MONO_DIR/"
+sudo mkdir -p "$MONO_DIR/bin/"
+sudo cp -r "$VENDORED_MONO/bin/" "$MONO_DIR/"
+sudo mkdir -p "$MONO_DIR/etc/"
+sudo cp -r "$VENDORED_MONO/etc/" "$MONO_DIR/"
+sudo mkdir -p "$MONO_DIR/include/"
+sudo cp -r "$VENDORED_MONO/include/" "$MONO_DIR/"
+sudo mkdir -p "$MONO_DIR/lib/"
+sudo cp -r "$VENDORED_MONO/lib/" "$MONO_DIR/"
+sudo mkdir -p "$MONO_DIR/share/"
+sudo cp -r "$VENDORED_MONO/share/" "$MONO_DIR/"
 
 # setting up paths for building
-PATH="$BUILD_DIR/mono-build/bin:$VENDORED_MONO/bin:$PATH"
-INCLUDE_PATH="$BUILD_DIR/mono-build/include"
+INCLUDE_PATH="$MONO_DIR/include"
 export CPATH="$INCLUDE_PATH"     
 export CPPPATH="$INCLUDE_PATH"
 
 #build app
 SLN=$(ls $BUILD_DIR/*.sln | head -1)
-BUILDCMD="$VENDORED_MONO/bin/mono $VENDORED_MONO/lib/mono/4.0/xbuild.exe $SLN"
+BUILDCMD="$MONO_DIR/bin/xbuild $SLN"
 echo "-----> building via $BUILDCMD"
 eval $BUILDCMD
-
