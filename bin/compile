@@ -29,10 +29,10 @@ VENDORED_MONO="$(mktmpdir mono)"
 echo "-----> Fetching Mono binaries"
 mkdir -p $VENDORED_MONO  && curl $MONO_PACKAGE -s -o -  | tar xzf - -C $VENDORED_MONO
 
-# vendor node into the slug
+# vendor mono into the build environment
 MONO_DIR="/app/vendor/mono"
 PATH="$MONO_DIR/bin:$PATH"
-echo "-----> Vendoring mono $MONO_VERSION"
+echo "-----> Vendoring mono $MONO_VERSION for build"
 mkdir -p "$MONO_DIR/"
 mkdir -p "$MONO_DIR/bin/"
 cp -r "$VENDORED_MONO/bin/" "$MONO_DIR/"
@@ -44,6 +44,13 @@ mkdir -p "$MONO_DIR/lib/"
 cp -r "$VENDORED_MONO/lib/" "$MONO_DIR/"
 mkdir -p "$MONO_DIR/share/"
 cp -r "$VENDORED_MONO/share/" "$MONO_DIR/"
+
+#vendor mono into the slug
+MONO_DIR="$BUILD_DIR/vendor/mono"
+BUILD_VENDORED_DIR="/app/vendor/mono"
+echo "-----> Vendoring mono $MONO_VERSION into slug"
+mkdir -p $MONO_DIR
+cp -r "$BUILD_VENDORED_DIR/*" $MONO_DIR
 
 # setting up paths for building
 INCLUDE_PATH="$MONO_DIR/include"
