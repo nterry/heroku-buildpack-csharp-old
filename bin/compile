@@ -33,7 +33,7 @@ DAEMON_DIR="/app/vendor/bin"
 echo "-----> Fetching Mono binaries"
 mkdir -p $VENDORED_MONO  && curl $MONO_PACKAGE -s -o -  | tar xzf - -C $VENDORED_MONO
 echo "-----> Fetching additional dependencies"
-mkdir -p $DAEMON_DIR && curl $DAEMON_PACKAGE -s -o $DAEMON_DIR/daemon
+mkdir -p "$DAEMON_DIR/" && curl $DAEMON_PACKAGE -s -o "$DAEMON_DIR/daemon"
 
 # vendor mono into the build environment
 MONO_DIR="/app/vendor/mono"
