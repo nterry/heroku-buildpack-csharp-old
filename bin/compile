@@ -27,7 +27,7 @@ DAEMON_PACKAGE="https://s3.amazonaws.com/daemon-bin/daemon"
 VENDORED_MONO="$(mktmpdir mono)"
 
 #daemon directories
-DAEMON_DIR="/app/vendor/bin"
+DAEMON_DIR="$BUILD_DIR/vendor/bin"
 
 # download and unpack packages
 echo "-----> Fetching Mono binaries"
