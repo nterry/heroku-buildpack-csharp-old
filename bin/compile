@@ -12,15 +12,16 @@ mktmpdir() {
 }
 
 # config
-MONO_VERSION="2.10.8.1"
-S3_BUCKET="bh-buildpack-mono"
+MONO_VERSION="3.0.10"
+S3_BUCKET="heroku-languagepack-mono"
 
 # parse and derive params
 BUILD_DIR=$1
 CACHE_DIR=$2
 
 # s3 packages
-MONO_PACKAGE="https://s3.amazonaws.com/mono-bin/mono-${MONO_VERSION}/mono-${MONO_VERSION}.tgz"
+https://s3.amazonaws.com/heroku-languagepack-mono/mono3/mono-3.0.10.tgz
+MONO_PACKAGE="https://s3.amazonaws.com/heroku-languagepack-mono/mono3/mono-${MONO_VERSION}.tgz"
 DAEMON_PACKAGE="https://s3.amazonaws.com/daemon-bin/daemon"
 
 # vendor directories
