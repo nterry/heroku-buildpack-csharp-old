@@ -3,3 +3,6 @@ mono-2.10.8/
 .DS_STORE
 *.tgz
 *.gz
+
+*.iml
+.idea/
