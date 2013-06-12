@@ -6,5 +6,5 @@ cat <<EOF
 config_vars:
   PATH: /usr/local/bin:/usr/bin:/bin
 default_process_types:
-  web: vendor/mono/bin/mono-sgen CrowbarDaemon/bin/Release/CrowbarDaemon.exe --port=$PORT
+  web: vendor/mono3/bin/mono-sgen CrowbarDaemon/bin/Release/CrowbarDaemon.exe --port=$PORT
 EOF
