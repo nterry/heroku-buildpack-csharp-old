@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+# fail fast
+set -e
+
+mktmpdir() {
+  dir=$(mktemp -t mono-XXXX)
+  rm -rf $dir
+  mkdir -p $dir
+  echo $dir
+}
+
+# config
+MONO_VERSION="3.0.10"
+S3_BUCKET="heroku-languagepack-mono"
+
+# parse and derive params
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+# s3 packages
+MONO_PACKAGE="https://s3.amazonaws.com/heroku-languagepack-mono/mono3/mono-${MONO_VERSION}.tgz"
+DAEMON_PACKAGE="https://s3.amazonaws.com/daemon-bin/daemon"
+
+# vendor directories
+VENDORED_MONO="$(mktmpdir mono)"
+
+#daemon directories
+DAEMON_DIR="$BUILD_DIR/vendor/bin"
+
+# download and unpack packages
+echo "-----> Fetching Mono binaries"
+mkdir -p $VENDORED_MONO  && curl $MONO_PACKAGE -s -o -  | tar xzf - -C $VENDORED_MONO
+echo "-----> Fetching additional dependencies"
+mkdir -p "$DAEMON_DIR/" && curl $DAEMON_PACKAGE -s -o "$DAEMON_DIR/daemon"
+chmod 755 "$DAEMON_DIR/daemon"
+
+# vendor mono into the build environment
+MONO_DIR="/app/vendor/mono3"
+PATH="$MONO_DIR/bin:$PATH"
+echo "-----> Vendoring mono $MONO_VERSION for build"
+mkdir -p "$MONO_DIR/"
+mkdir -p "$MONO_DIR/bin/"
+cp -r "$VENDORED_MONO/bin/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/etc/"
+cp -r "$VENDORED_MONO/etc/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/include/"
+cp -r "$VENDORED_MONO/include/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/lib/"
+cp -r "$VENDORED_MONO/lib/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/share/"
+cp -r "$VENDORED_MONO/share/" "$MONO_DIR/"
+
+#vendor mono into the slug
+MONO_DIR="$BUILD_DIR/vendor/mono3"
+echo "-----> Vendoring mono $MONO_VERSION into slug"
+mkdir -p "$MONO_DIR/"
+mkdir -p "$MONO_DIR/bin/"
+cp -r "$VENDORED_MONO/bin/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/etc/"
+cp -r "$VENDORED_MONO/etc/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/include/"
+cp -r "$VENDORED_MONO/include/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/lib/"
+cp -r "$VENDORED_MONO/lib/" "$MONO_DIR/"
+mkdir -p "$MONO_DIR/share/"
+cp -r "$VENDORED_MONO/share/" "$MONO_DIR/"
+
+# setting up paths for building
+INCLUDE_PATH="$MONO_DIR/include"
+export CPATH="$INCLUDE_PATH"     
+export CPPPATH="$INCLUDE_PATH"
+
+#build app
+SLN=$(ls $BUILD_DIR/*.sln | head -1)
+BUILDCMD="$MONO_DIR/bin/xbuild $SLN"
+echo "-----> building via $BUILDCMD"
+eval $BUILDCMD
