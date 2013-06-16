@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 # Heroku::Buildpack::Csharp
-
-TODO: Write a gem description
 
 ## Installation
 
@@ -67,4 +64,3 @@ In order to take advantage of Mono and Heroku, you need to specify the buildpack
     $ heroku create --stack cedar --buildpack http://github.com/BenHall/heroku-buildpack-mono
     
 When you push your source code, the buildpack will be downloaded and execute - that's when the magic happens.
->>>>>>> 6868eb3a3c04f71716f021809052212c8f54cfc3
