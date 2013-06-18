@@ -1,10 +1,10 @@
 module Heroku
   module Buildpack
-    module Csharp
+    module Utils
       class SolutionFileManager
         attr_reader :solution_file
 
-        def initialize(solution_file_path='')
+        def initialize(solution_file_path=/.*\.sln/)
           @solution = {}
           if not File.exist?(solution_file_path)
             raise "Could not find solution at #{solution_file_path} or in the project root." if not File.exist?(/^.*\.sln/)
@@ -47,13 +47,13 @@ module Heroku
 
         def parse_global_section(global_section)
           global_hash = {}
-          global_hash[:properies] = []
+          global_hash[:properties] = []
           tmp = global_section.first.scan(/^GlobalSection\((.*?)\)\s=\s(preSolution|postSolution)(.*)(EndGlobalSection)/m)
           global_hash[:property_tag] = tmp[0][0]
           global_hash[:property_step] = tmp[0][1]
           tmp[0][2].gsub("\t", '').strip.split("\n").each do |property|
             kv_prop = property.split('=')
-            global_hash[:properies] << { :key => kv_prop[0].strip, :value => kv_prop[1].strip }
+            global_hash[:properties] << { :key => kv_prop[0].strip, :value => kv_prop[1].strip }
           end
           global_hash
         end
