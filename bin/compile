@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
 
+
+export GEM_HOME=/home/mygemrepository
+
+
 # fail fast
 set -e
 

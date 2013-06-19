@@ -1,22 +1,18 @@
 #!/usr/bin/env ruby
 
+
 require_relative '../lib/heroku/buildpack/csharp'
 
-#sln_file = '../../CROWBAR/CROWBAR.sln'
+c = Heroku::Buildpack::Csharp.new('/home/nterry/projects/CROWBAR')
 
-#sln_file_manager = Heroku::Buildpack::Csharp::SolutionFileManager.new(sln_file)
-
-#content = sln_file_manager.parse
-
-#puts content
-
-c = Heroku::Buildpack::Csharp.new('/home/nterry/projects/CROWBAR/CROWBAR.sln')
-
-gprop = c.get_global_property('MonoDevelopProperties', 'StartupItem')
-
-prop = c.get_project_property('CrowbarDaemon', 'guid')
-
+#gprop = c.get_global_property('MonoDevelopProperties', 'StartupItem')
+#
+#prop = c.get_project_property('CrowbarDaemon', 'guid')
+#
+#config = XmlSimple.xml_in("/home/nterry/projects/CROWBAR/#{gprop}")
+#
 #puts gprop
-
+#
 #puts prop
 
+puts c.get_executable_path 'Release'

@@ -6,11 +6,15 @@ module Heroku
 
         def initialize(solution_file_path=/.*\.sln/)
           @solution = {}
-          if not File.exist?(solution_file_path)
-            raise "Could not find solution at #{solution_file_path} or in the project root." if not File.exist?(/^.*\.sln/)
-            @solution_file = File.open(/^.*\.sln/, 'r+')
+          if File.directory?(solution_file_path)
+            sln_file = Dir["#{solution_file_path}/*.sln"]
+            raise "Solution file not present in directory #{solution_file_path}"  if sln_file.nil?
+            puts "Multiple solution files found in directory #{solution_file_path}. Accepting the first." if sln_file.count > 1
+            @solution_file = File.open(sln_file[0], 'r+')
+          elsif File.file?(solution_file_path)
+            @solution_file = solution_file_path
           else
-            @solution_file = File.open(solution_file_path, 'r+')
+            raise "Didn't understand being called with #{solution_file_path}"
           end
         end
 
