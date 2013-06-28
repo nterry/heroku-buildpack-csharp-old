@@ -1,9 +1,17 @@
-#!/usr/bin/env bash
-# bin/detect <build-dir>
+#!/usr/bin/env ruby
+require_relative '../lib/heroku-buildpack-csharp/utils/language-pack-manager'
 
-files=$(ls $1/*.sln 2> /dev/null | wc -l)
-if [ "$files" != "0" ]; then
-  echo "C#" && exit 0
-else
+
+build_dir = ARGV[0]
+
+files = Dir.glob("#{build_dir}/*.sln")
+
+language_pack = HerokuBuildpackCsharp::Utils::LanguagePackManager.new().s3 'heroku-languagepack-mono', '3.0.10'
+language_pack.prepare '/tmp/dnld', '/tmp/slug', '/tmp/build'
+
+if files.nil?
   exit 1
-fi
+else
+  puts 'C#'
+  exit 0
+end
