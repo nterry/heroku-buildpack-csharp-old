@@ -2,28 +2,41 @@ module HerokuBuildpackCsharp
   module Utils
     module ArchiveManager
 
-      def self.ungzip(tarfile)
-        z = Zlib::GzipReader.new(tarfile)
-        unzipped = StringIO.new(z.read)
-        z.close
-        unzipped
+      def self.download_and_extract(url, destination_dir)
+        begin
+          fetch url, destination_dir
+
+        rescue Exception => e
+          puts "Error on step #{e.message}. Aborting."
+          raise 'Extract'
+        end
+
       end
 
-      def self.untar(io, destination)
-        Gem::Package::TarReader.new io do |tar|
-          tar.each do |tarfile|
-            destination_file = File.join destination, tarfile.full_name
-            if tarfile.directory?
-              FileUtils.mkdir_p destination_file
-            else
-              destination_directory = File.dirname(destination_file)
-              FileUtils.mkdir_p destination_directory unless File.directory?(destination_directory)
-              File.open destination_file, 'wb' do |f|
-                f.print tarfile.read
-              end
-            end
-          end
+
+      private
+
+      def self.fetch(url, destination)
+        print '-----> Fetching mono language pack'
+        fetch_output = `mkdir -p #{destination}; cd #{destination}; curl --silent -O #{url}; cd -`
+        if not($?.success?)
+          puts "\tError"
+          puts fetch_output
+          raise "'Fetch'"
         end
+        puts "\tDone"
+        unpack(destination)
+      end
+
+      def self.unpack(destination)
+        print '-----> Unpacking mono language pack'
+        unpack_output = `cd #{destination}; tar -xzf *.tgz; rm -rf *.tgz; cd -`
+        if not($?.success?)
+          puts "\tError"
+          puts unpack_output
+          raise "'Unpack'"
+        end
+        puts "\tDone"
       end
     end
   end

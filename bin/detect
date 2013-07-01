@@ -1,13 +1,21 @@
 #!/usr/bin/env ruby
-require_relative '../lib/heroku-buildpack-csharp/utils/language-pack-manager'
 
+#`export GEM_HOME=/app/vendor/ruby/gems; gem install iron-spect`
+
+require 'iron-spect'
+require_relative '../lib/heroku-buildpack-csharp/package-managers/nuget-package-manager'
+
+require_relative '../lib/heroku-buildpack-csharp/utils/language-pack-manager'
 
 build_dir = ARGV[0]
 
 files = Dir.glob("#{build_dir}/*.sln")
 
-language_pack = HerokuBuildpackCsharp::Utils::LanguagePackManager.new().s3 'heroku-languagepack-mono', '3.0.10'
+language_pack = HerokuBuildpackCsharp::Utils::LanguagePackManager.new().s3 'heroku-languagepack-mono', 'mono3/mono-3.0.10.tgz'
 language_pack.prepare '/tmp/dnld', '/tmp/slug', '/tmp/build'
+
+#package_manager = HerokuBuildpackCsharp::PackageManagers::NugetPackageManager.new(nil, files.first, nil)
+#package_manager.update_dependencies
 
 if files.nil?
   exit 1

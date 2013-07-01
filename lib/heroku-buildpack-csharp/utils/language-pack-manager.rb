@@ -1,33 +1,37 @@
 require 'rubygems'
-require 'rubygems/package'
-require 'zlib'
-require 'fileutils'
-require 'open-uri'
 
 require_relative 'archive-manager'
 
 module HerokuBuildpackCsharp
   module Utils
-
-    include ArchiveManager
     class LanguagePackManager
+      include ArchiveManager
 
       def initialize(url='http://foo.com/bar/somefile.tgz')
         @url = url
         parse_url
+        self
       end
 
       # "overloaded" constructor to set s3-specific url
-      def s3(s3_bucket, mono_version)
-        @url = "https://s3.amazonaws.com/#{s3_bucket}/mono3/mono-#{mono_version}.tgz"
+      def s3(s3_bucket, artifact_path)
+        @url = "https://s3.amazonaws.com/#{s3_bucket}/#{artifact_path}"
+        parse_url
         self
       end
 
       def prepare(temp_dir, slug_dir, build_dir)
-        download temp_dir
-        #vendor_mono temp_dir, slug_dir
-        #vendor_mono temp_dir, build_dir
+        begin
+          download temp_dir
+          download_nuget 'https://az320820.vo.msecnd.net/downloads/nuget.exe', "#{build_dir}/bin"
+          vendor_mono temp_dir, slug_dir
+          vendor_mono temp_dir, build_dir
+        rescue Exception => e
+          puts "Failed to prepare buildpack. Failed on step '#{e.message}'"
+          raise 'Prepare'
+        end
       end
+
 
       private
 
@@ -37,18 +41,30 @@ module HerokuBuildpackCsharp
       end
 
       def vendor_mono(source_dir, dest_dir)
-        FileUtils.cp_r("#{source_dir}/bin", "#{dest_dir}")
-        FileUtils.cp_r("#{source_dir}/etc", "#{dest_dir}")
-        FileUtils.cp_r("#{source_dir}/include", "#{dest_dir}")
-        FileUtils.cp_r("#{source_dir}/lib", "#{dest_dir}")
-        FileUtils.cp_r("#{source_dir}/share", "#{dest_dir}")
+        print "-----> Vendoring mono into #{dest_dir}"
+        vendor_result = `mkdir -p #{dest_dir}; cp -r #{source_dir}/* #{dest_dir}`
+        if not($?.success?)
+          puts "\tError"
+          puts vendor_result
+          raise "'vendor_#{dest_dir}'"
+        end
+        puts "\tDone"
       end
 
       def download(dest_dir)
         return if File.exist? "#{dest_dir}/#{@filename}"
-        source = open(@url)
-        io = ArchiveManager.ungzip source
-        ArchiveManager.untar io, dest_dir
+        ArchiveManager.download_and_extract @url, dest_dir
+      end
+
+      def download_nuget(url, dest_dir)
+        print '-----> Fetching Nuget'
+        nuget_download_result = `mkdir -p #{dest_dir}; cd #{dest_dir}; curl --silent -O #{url}; chmod 755 nuget.exe; cd -`
+        if not($?.success?)
+          puts "\tError"
+          puts nuget_download_result
+          raise 'download_nuget'
+        end
+        puts "\tDone"
       end
     end
   end
